@@ -111,12 +111,12 @@ public class AYGPUImageI420DataOutput implements AYGPUImageInput {
                 bgraBuffer.clear();
                 yuvBuffer.clear();
                 glFinish();
-                glReadPixels(0, 0, outputWidth, outputHeight, GL_RGBA, GL_UNSIGNED_BYTE, bgraBuffer);
+                glReadPixels(0, 0, outputLineSize, outputHeight, GL_RGBA, GL_UNSIGNED_BYTE, bgraBuffer);
 
-                AYYuvUtil.RGBA_To_I420(bgraBuffer, yuvBuffer, outputWidth, outputHeight);
-                System.arraycopy(yuvBuffer.array(), 0, outputYUVData, 0, outputWidth * outputHeight);
-                System.arraycopy(yuvBuffer.array(), outputWidth * outputHeight, outputYUVData, outputWidth * outputHeight, outputWidth * outputHeight / 4);
-                System.arraycopy(yuvBuffer.array(), outputWidth * outputHeight + outputWidth * outputHeight / 4, outputYUVData, outputWidth * outputHeight + outputWidth * outputHeight / 4, outputWidth * outputHeight / 4);
+                AYYuvUtil.RGBA_To_I420(bgraBuffer, yuvBuffer, outputLineSize, outputHeight);
+
+                yuvBuffer.rewind();
+                yuvBuffer.get(outputYUVData);
 
                 //TODO TEST: 保存最终的RGBA数据到 SDCard/test.png
 //                try {
@@ -142,8 +142,8 @@ public class AYGPUImageI420DataOutput implements AYGPUImageInput {
         this.outputHeight = height;
         this.outputLineSize = lineSize;
 
-        this.bgraBuffer = ByteBuffer.allocateDirect(width * height * 4);
-        this.yuvBuffer = ByteBuffer.allocateDirect(width * height * 3 / 2);
+        this.bgraBuffer = ByteBuffer.allocateDirect(lineSize * height * 4);
+        this.yuvBuffer = ByteBuffer.allocateDirect(lineSize * height * 3 / 2);
     }
 
     public void setRotateMode(AYGPUImageConstants.AYGPUImageRotationMode rotateMode) {
